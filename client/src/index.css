@@ -1,0 +1,254 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --color-app: var(--bg-app);
+  --color-panel: var(--bg-panel);
+  --color-chat: var(--bg-chat);
+  --color-hover: var(--bg-hover);
+  --color-selected: var(--bg-selected);
+  --color-field: var(--bg-input);
+
+  --color-ink: var(--text-primary);
+  --color-ink-2: var(--text-secondary);
+  --color-ink-3: var(--text-tertiary);
+
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-bubble-out: var(--bubble-out);
+  --color-bubble-out-text: var(--bubble-out-text);
+  --color-bubble-in: var(--bubble-in);
+  --color-bubble-in-text: var(--bubble-in-text);
+
+  --color-tick-sent: var(--tick-sent);
+  --color-tick-seen: var(--tick-seen);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  /* Surfaces */
+  --bg-app:            #F0F2F5;   /* outer canvas / behind panels */
+  --bg-panel:          #FFFFFF;   /* sidebar, header, cards */
+  --bg-chat:           #EFEAE2;   /* conversation wallpaper */
+  --bg-hover:          #F5F6F6;
+  --bg-selected:       #F0F2F5;
+  --bg-input:          #F0F2F5;
+
+  /* Text */
+  --text-primary:      #111B21;
+  --text-secondary:    #667781;
+  --text-tertiary:     #8696A0;
+  --text-on-accent:    #FFFFFF;
+
+  /* Lines */
+  --border:            #E9EDEF;
+  --border-strong:     #D1D7DB;
+
+  /* Accent (subtle warm orange) */
+  --accent:            #E06928;
+  --accent-hover:      #C95717;
+  --accent-soft:       #FDF2EA;   /* subtle warm peach/cream tint */
+
+  /* Chat bubbles */
+  --bubble-out:        #FCECE2;   /* calm subtle warm peach outgoing bubble */
+  --bubble-out-text:   #111B21;
+  --bubble-in:         #FFFFFF;
+  --bubble-in-text:    #111B21;
+
+  /* Status */
+  --tick-sent:         #8696A0;   /* gray */
+  --tick-seen:         #E06928;   /* subtle orange */
+  --danger:            #D92D20;
+  --success:           #E06928;
+
+  /* Elevation (very light) */
+  --shadow-sm: 0 1px 1px rgba(11, 20, 26, 0.08);
+  --shadow-md: 0 2px 8px rgba(11, 20, 26, 0.10);
+
+  /* Compatibility aliases */
+  --bg: var(--bg-app);
+  --card: var(--bg-panel);
+  --text: var(--text-primary);
+  --shadow-light: rgba(255, 255, 255, 0.7);
+  --shadow-dark: rgba(11, 20, 26, 0.08);
+}
+
+[data-theme="dark"], .dark {
+  --bg-app:            #0B141A;
+  --bg-panel:          #111B21;
+  --bg-chat:           #0B141A;
+  --bg-hover:          #202C33;
+  --bg-selected:       #2A3942;
+  --bg-input:          #202C33;
+
+  --text-primary:      #E9EDEF;
+  --text-secondary:    #8696A0;
+  --text-tertiary:     #667781;
+
+  --border:            #222D34;
+  --border-strong:     #2F3B43;
+
+  --accent:            #F27A30;
+  --accent-hover:      #FA8D4D;
+  --accent-soft:       #301B10;
+
+  --bubble-out:        #3E2314;
+  --bubble-out-text:   #E9EDEF;
+  --bubble-in:         #202C33;
+  --bubble-in-text:    #E9EDEF;
+
+  --shadow-sm: none;
+  --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.35);
+
+  --bg: var(--bg-app);
+  --card: var(--bg-panel);
+  --text: var(--text-primary);
+  --shadow-light: rgba(255, 255, 255, 0.03);
+  --shadow-dark: rgba(0, 0, 0, 0.25);
+}
+
+*, ::before, ::after {
+  transition-property: background-color, border-color, color, opacity;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  transition-duration: 150ms;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Scrollbars */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Bubble tails */
+.bubble-tail-out {
+  position: relative;
+  border-top-right-radius: 0 !important;
+}
+
+.bubble-tail-out::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -8px;
+  width: 8px;
+  height: 13px;
+  background: var(--bubble-out);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+.bubble-tail-in {
+  position: relative;
+  border-top-left-radius: 0 !important;
+}
+
+.bubble-tail-in::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -8px;
+  width: 8px;
+  height: 13px;
+  background: var(--bubble-in);
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dropdownSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modalBackdrop {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes modalContent {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
