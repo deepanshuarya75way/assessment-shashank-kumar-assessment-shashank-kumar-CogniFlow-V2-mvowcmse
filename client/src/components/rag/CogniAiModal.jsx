@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import KNowledgeExplorer from "./KnowledgeExplorer"
 import axios from "axios";
 import {
   X,

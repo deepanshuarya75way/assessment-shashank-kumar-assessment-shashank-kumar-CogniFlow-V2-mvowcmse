@@ -22,7 +22,7 @@ const knowledgeSourceSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    discription:{
+    description:{
       type:String,
       trim:true,
       default:"",

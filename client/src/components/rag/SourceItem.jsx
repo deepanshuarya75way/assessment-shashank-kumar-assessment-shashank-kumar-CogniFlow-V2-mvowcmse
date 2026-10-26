@@ -1,5 +1,5 @@
 import React from "react";
-import { FileText, Image as ImageIcon, FileCode, Sparkles, Trash2, CheckCircle, Loader2, AlertCircle } from "lucide-react";
+import { FileText, Image as ImageIcon, FileCode, Sparkles, Trash2, CheckCircle, Loader2, AlertCircle, Link as LinkIcon } from "lucide-react";
 
 export const SourceItem = ({ source, onToggle, onDelete }) => {
   if (!source) return null;
@@ -7,6 +7,7 @@ export const SourceItem = ({ source, onToggle, onDelete }) => {
   const isPdf = source.type === "pdf";
   const isImage = source.type === "image";
   const isLearned = source.type === "ai_answer";
+  const isWebLink = source.type === "web_link";
 
   const formatSize = (bytes) => {
     if (!bytes) return "";
@@ -40,6 +41,8 @@ export const SourceItem = ({ source, onToggle, onDelete }) => {
             <FileText size={18} />
           ) : isImage ? (
             <ImageIcon size={18} />
+          ) : isWebLink ? (
+            <Linkicon size = {18} />
           ) : isLearned ? (
             <Sparkles size={18} />
           ) : (
