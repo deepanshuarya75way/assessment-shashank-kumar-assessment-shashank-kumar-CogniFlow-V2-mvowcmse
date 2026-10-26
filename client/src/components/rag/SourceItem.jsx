@@ -42,7 +42,7 @@ export const SourceItem = ({ source, onToggle, onDelete }) => {
           ) : isImage ? (
             <ImageIcon size={18} />
           ) : isWebLink ? (
-            <Linkicon size = {18} />
+            <LinkIcon size = {18} />
           ) : isLearned ? (
             <Sparkles size={18} />
           ) : (

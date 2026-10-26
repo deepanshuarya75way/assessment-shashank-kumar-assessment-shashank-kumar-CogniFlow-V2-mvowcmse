@@ -33,7 +33,7 @@ const getInitialFilters = (roomId) => {
   return {
     q: params.get("q") || "",
     type: params.get("type") || "all",
-    roomId: params.get("roomId") || roomId || "",
+    roomId:roomId || params.get("roomId") || "",
     from: params.get("from") || "",
     to: params.get("to") || "",
     sort: params.get("sort") || "newest",
