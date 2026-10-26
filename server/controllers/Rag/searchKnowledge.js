@@ -15,12 +15,12 @@ export const searchKnowledge = async (req, res) => {
       from = "",
       to = "",
       page = "1",
-      limit = "10",
+      limit = "5",
       sort = "newest",
     } = req.query;
 
     const currentPage = Math.max(1, parseInt(page, 10) || 1);
-    const pageSize = Math.min(50, Math.max(1, parseInt(limit, 10) || 10));
+    const pageSize = Math.min(50, Math.max(1, parseInt(limit, 5) || 10));
 
     if (type !== "all" && !ALLOWED_TYPES.includes(type)) {
       return res.status(400).json({ message: "Invalid material type" });

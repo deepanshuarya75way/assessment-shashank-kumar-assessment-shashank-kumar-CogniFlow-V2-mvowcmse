@@ -112,7 +112,7 @@ const KnowledgeExplorer = ({
             ...filters,
             q: debouncedQuery,
             page: pagination.page,
-            limit: 10,
+            limit: 5,
           },
         }
       );
