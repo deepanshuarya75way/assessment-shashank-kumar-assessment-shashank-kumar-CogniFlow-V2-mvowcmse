@@ -1024,6 +1024,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
       <KnowledgePanel
         isOpen={isKnowledgePanelOpen}
         onClose={() => setIsKnowledgePanelOpen(false)}
+        roomId={selectedChat?._id}
         sources={sources}
         ragMode={ragMode}
         isUploading={isKnowledgeUploading}

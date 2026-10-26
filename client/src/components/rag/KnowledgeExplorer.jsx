@@ -300,7 +300,6 @@ const KnowledgeExplorer = ({
         page: 1,
       }));
 
-      fetchKnowledge();
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Could not add link"

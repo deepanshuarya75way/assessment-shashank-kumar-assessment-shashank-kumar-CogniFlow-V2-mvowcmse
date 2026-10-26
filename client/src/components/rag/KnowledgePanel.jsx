@@ -1,11 +1,19 @@
+
 import React, { useState, useRef } from "react";
-import { X, UploadCloud, Plus, FileText, BookOpen, Layers, Sparkles } from "lucide-react";
+import {
+  X,
+  UploadCloud,
+  BookOpen,
+  Sparkles,
+} from "lucide-react";
+
 import ModeSelector from "./ModeSelector";
-import SourceItem from "./SourceItem";
+import KnowledgeExplorer from "./KnowledgeExplorer";
 
 export const KnowledgePanel = ({
   isOpen,
   onClose,
+  roomId,
   sources = [],
   ragMode = "strict",
   isUploading = false,
@@ -17,51 +25,89 @@ export const KnowledgePanel = ({
   onUpdateMode,
   onGenerateQuiz,
 }) => {
-  const [activeTab, setActiveTab] = useState("file"); // "file" | "text"
+  const [activeTab, setActiveTab] = useState("file");
   const [textTitle, setTextTitle] = useState("");
   const [textContent, setTextContent] = useState("");
   const [isDragging, setIsDragging] = useState(false);
+
   const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
 
+  // Count enabled sources that are ready to use.
+  const readyCount = sources.filter(
+    (source) => source.status === "ready" && source.enabled
+  ).length;
+
+  // Handle a dropped file.
   const handleFileDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      onUploadFile(e.dataTransfer.files[0]);
+
+    if (isUploading) return;
+
+    const files = e.dataTransfer?.files;
+
+    if (files && files.length > 0 && onUploadFile) {
+      onUploadFile(files[0]);
     }
   };
 
+  // Handle file selection from the file picker.
   const handleFileInputChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      onUploadFile(e.target.files[0]);
-      e.target.value = "";
+    const files = e.target.files;
+
+    if (files && files.length > 0 && onUploadFile) {
+      onUploadFile(files[0]);
     }
+
+    // Allow selecting the same file again.
+    e.target.value = "";
   };
 
+  // Handle text submission.
   const handleTextSubmit = async (e) => {
     e.preventDefault();
-    if (!textContent.trim()) return;
-    await onUploadText(textTitle.trim(), textContent.trim());
-    setTextTitle("");
-    setTextContent("");
-    setActiveTab("file");
+
+    const title = textTitle.trim();
+    const content = textContent.trim();
+
+    if (!content || isUploading || !onUploadText) return;
+
+    try {
+      await onUploadText(title, content);
+
+      setTextTitle("");
+      setTextContent("");
+      setActiveTab("file");
+    } catch (error) {
+      console.error("Failed to upload text:", error);
+    }
   };
 
-  const readyCount = sources.filter((s) => s.status === "ready" && s.enabled).length;
+  const handleGenerateQuiz = () => {
+    if (!onGenerateQuiz) return;
+
+    onGenerateQuiz();
+    onClose?.();
+  };
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-[var(--bg-panel)] shadow-2xl border-l border-[var(--border)] z-50 flex flex-col animate-[slideInRight_0.25s_cubic-bezier(0.16,1,0.3,1)]">
-      
+    <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-[var(--border)] bg-[var(--bg-panel)] shadow-2xl animate-[slideInRight_0.25s_cubic-bezier(0.16,1,0.3,1)] sm:w-[420px]">
+
       {/* Header */}
-      <div className="h-[60px] px-5 border-b border-[var(--border)] flex items-center justify-between flex-shrink-0">
+      <div className="flex h-[60px] flex-shrink-0 items-center justify-between border-b border-[var(--border)] px-5">
         <div className="flex items-center gap-2.5 text-[var(--accent)]">
           <BookOpen size={20} />
+
           <div>
-            <h3 className="font-semibold text-base text-[var(--text)] leading-tight">Chat Knowledge</h3>
+            <h3 className="text-base font-semibold leading-tight text-[var(--text)]">
+              Chat Knowledge
+            </h3>
+
             <p className="text-[11px] text-[var(--text-muted)]">
-              {readyCount} ready {readyCount === 1 ? "source" : "sources"} in this room
+              {readyCount} ready{" "}
+              {readyCount === 1 ? "source" : "sources"} in this room
             </p>
           </div>
         </div>
@@ -69,64 +115,73 @@ export const KnowledgePanel = ({
         <button
           type="button"
           onClick={onClose}
-          className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--icon-default)] hover:text-[var(--text)] hover:bg-[var(--bg-input)] transition-all cursor-pointer"
+          aria-label="Close knowledge panel"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-[var(--icon-default)] transition-all hover:bg-[var(--bg-input)] hover:text-[var(--text)]"
         >
           <X size={18} />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-5">
-        
-        {/* Mode Selector */}
-        <ModeSelector mode={ragMode} onSelectMode={onUpdateMode} />
+      {/* Scrollable Content */}
+      <div className="flex flex-1 flex-col gap-5 overflow-y-auto p-5">
 
-        {/* Quick Quiz on Documents Action */}
+        {/* Mode Selector */}
+        <ModeSelector
+          mode={ragMode}
+          onSelectMode={onUpdateMode}
+        />
+
+        {/* Quick Quiz */}
         {readyCount > 0 && onGenerateQuiz && (
-          <div className="p-3.5 rounded-xl bg-[var(--accent-soft)] border border-[var(--accent)]/30 flex items-center justify-between shadow-xs">
+          <div className="flex items-center justify-between rounded-xl border border-[var(--accent)]/30 bg-[var(--accent-soft)] p-3.5 shadow-xs">
             <div className="flex flex-col">
-              <span className="text-xs font-semibold text-[var(--text)] flex items-center gap-1.5">
-                <Sparkles size={14} className="text-[var(--accent)]" />
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text)]">
+                <Sparkles
+                  size={14}
+                  className="text-[var(--accent)]"
+                />
                 Test Your Knowledge
               </span>
+
               <span className="text-[11px] text-[var(--text-muted)]">
                 Generate an interactive quiz from your docs
               </span>
             </div>
+
             <button
               type="button"
-              onClick={() => {
-                onGenerateQuiz();
-                onClose();
-              }}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-xs transition-colors cursor-pointer flex-shrink-0"
+              onClick={handleGenerateQuiz}
+              className="flex flex-shrink-0 cursor-pointer items-center gap-1 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[var(--accent-hover)]"
             >
-              <span>Take Quiz</span>
+              Take Quiz
             </button>
           </div>
         )}
 
-        {/* Upload Tabs */}
+        {/* Add Knowledge */}
         <div className="flex flex-col gap-2.5">
           <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
             <span>Add Knowledge</span>
-            <div className="flex gap-1 bg-[var(--bg-input)] p-0.5 rounded-lg border border-[var(--border)]">
+
+            <div className="flex gap-1 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] p-0.5">
               <button
                 type="button"
                 onClick={() => setActiveTab("file")}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all duration-150 cursor-pointer ${
+                className={`cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-all duration-150 ${
                   activeTab === "file"
-                    ? "bg-[var(--bg-panel)] text-[var(--accent)] shadow-xs font-semibold"
+                    ? "bg-[var(--bg-panel)] font-semibold text-[var(--accent)] shadow-xs"
                     : "text-[var(--text-muted)] hover:text-[var(--text)]"
                 }`}
               >
                 Upload File
               </button>
+
               <button
                 type="button"
                 onClick={() => setActiveTab("text")}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all duration-150 cursor-pointer ${
+                className={`cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-medium transition-all duration-150 ${
                   activeTab === "text"
-                    ? "bg-[var(--bg-panel)] text-[var(--accent)] shadow-xs font-semibold"
+                    ? "bg-[var(--bg-panel)] font-semibold text-[var(--accent)] shadow-xs"
                     : "text-[var(--text-muted)] hover:text-[var(--text)]"
                 }`}
               >
@@ -135,111 +190,171 @@ export const KnowledgePanel = ({
             </div>
           </div>
 
+          {/* File Upload */}
           {activeTab === "file" ? (
             <div
               onDragOver={(e) => {
                 e.preventDefault();
-                setIsDragging(true);
+
+                if (!isUploading) {
+                  setIsDragging(true);
+                }
               }}
-              onDragLeave={() => setIsDragging(false)}
+              onDragLeave={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget)) {
+                  setIsDragging(false);
+                }
+              }}
               onDrop={handleFileDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`p-6 rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+              onClick={() => {
+                if (!isUploading) {
+                  fileInputRef.current?.click();
+                }
+              }}
+              onKeyDown={(e) => {
+                if (
+                  !isUploading &&
+                  (e.key === "Enter" || e.key === " ")
+                ) {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
+              role="button"
+              tabIndex={isUploading ? -1 : 0}
+              aria-label="Upload a PDF or image"
+              aria-disabled={isUploading}
+              className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-all ${
+                isUploading
+                  ? "cursor-not-allowed opacity-70"
+                  : "cursor-pointer"
+              } ${
                 isDragging
-                  ? "border-[var(--accent)] bg-[var(--accent-soft)] scale-[0.99]"
+                  ? "scale-[0.99] border-[var(--accent)] bg-[var(--accent-soft)]"
                   : "border-[var(--border)] bg-[var(--bg-input)]/50 hover:bg-[var(--bg-input)]"
               }`}
             >
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".pdf,image/png,image/jpeg,image/webp"
+                accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"
                 onChange={handleFileInputChange}
+                disabled={isUploading}
                 className="hidden"
               />
-              <div className="w-11 h-11 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center mb-2">
+
+              <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent)]">
                 <UploadCloud size={22} />
               </div>
+
               <p className="text-xs font-semibold text-[var(--text)]">
-                Click to upload or drag & drop
+                {isUploading
+                  ? "Uploading file..."
+                  : "Click to upload or drag & drop"}
               </p>
-              <p className="text-[11px] text-[var(--text-muted)] mt-1">
+
+              <p className="mt-1 text-[11px] text-[var(--text-muted)]">
                 PDF, PNG, JPG, WEBP (Max 10 MB, up to 200 pages)
               </p>
 
+              {/* Upload Progress */}
               {isUploading && (
-                <div className="w-full mt-3 flex flex-col gap-1">
-                  <div className="w-full h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
+                <div className="mt-3 flex w-full flex-col gap-1">
+                  <div
+                    className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]"
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.min(
+                      100,
+                      Math.max(0, uploadProgress || 30)
+                    )}
+                  >
                     <div
-                      className="h-full bg-[var(--accent)] transition-all duration-200"
-                      style={{ width: `${uploadProgress || 30}%` }}
-                    ></div>
+                      className="h-full rounded-full bg-[var(--accent)] transition-all duration-200"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          Math.max(0, uploadProgress || 30)
+                        )}%`,
+                      }}
+                    />
                   </div>
-                  <span className="text-[11px] text-[var(--accent)] font-medium">Uploading & vectorizing...</span>
+
+                  <span className="text-[11px] font-medium text-[var(--accent)]">
+                    Uploading &amp; vectorizing...
+                  </span>
                 </div>
               )}
             </div>
           ) : (
-            <form onSubmit={handleTextSubmit} className="flex flex-col gap-2.5 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-input)]/40">
+            /* Text Upload */
+            <form
+              onSubmit={handleTextSubmit}
+              className="flex flex-col gap-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-input)]/40 p-3.5"
+            >
               <input
                 type="text"
                 value={textTitle}
                 onChange={(e) => setTextTitle(e.target.value)}
                 placeholder="Note Title (e.g. Project Specifications)"
-                className="w-full py-2 px-3 rounded-lg bg-[var(--bg-panel)] border border-[var(--border)] text-xs text-[var(--text)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
+                aria-label="Note title"
+                disabled={isUploading}
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-xs text-[var(--text)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
               />
+
               <textarea
                 rows={4}
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
                 placeholder="Paste key notes, FAQs, or raw facts here..."
+                aria-label="Note content"
                 required
-                className="w-full py-2 px-3 rounded-lg bg-[var(--bg-panel)] border border-[var(--border)] text-xs text-[var(--text)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] resize-none"
+                disabled={isUploading}
+                className="w-full resize-none rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-xs text-[var(--text)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
               />
+
               <button
                 type="submit"
-                disabled={isUploading || !textContent.trim()}
-                className="py-1.5 px-3 rounded-lg text-xs font-semibold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] shadow-xs transition-colors self-end disabled:opacity-50 cursor-pointer"
+                disabled={
+                  isUploading ||
+                  !textContent.trim() ||
+                  !onUploadText
+                }
+                className="self-end rounded-lg bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Add Note
+                {isUploading ? "Adding..." : "Add Note"}
               </button>
             </form>
           )}
         </div>
 
-        {/* Sources List */}
-        <div className="flex flex-col gap-2.5">
-          <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
-            <span>Knowledge Sources ({sources.length})</span>
+        {/* Knowledge Explorer */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-semibold text-[var(--text)]">
+              Knowledge Explorer
+            </h4>
+
+            <span className="text-xs text-[var(--text-muted)]">
+              {sources.length}{" "}
+              {sources.length === 1 ? "source" : "sources"}
+            </span>
           </div>
 
-          {sources.length === 0 ? (
-            <div className="p-8 rounded-xl border border-dashed border-[var(--border)] text-center flex flex-col items-center justify-center text-[var(--text-muted)]">
-              <Layers size={26} className="mb-2 opacity-40 text-[var(--accent)]" />
-              <p className="text-xs font-medium">No documents uploaded yet</p>
-              <p className="text-[11px] mt-1 max-w-[220px]">
-                Upload a PDF or image above to ground CogniBot's answers in your data.
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {sources.map((s) => (
-                <SourceItem
-                  key={s._id}
-                  source={s}
-                  onToggle={onToggleSource}
-                  onDelete={onDeleteSource}
-                />
-              ))}
-            </div>
-          )}
+          <KnowledgeExplorer
+            roomId={roomId}
+            onToggle={onToggleSource}
+            onDelete={onDeleteSource}
+          />
         </div>
 
       </div>
+      {/* End Scrollable Content */}
 
     </div>
+    // End Panel
   );
 };
 
 export default KnowledgePanel;
-

@@ -178,7 +178,7 @@ export const saveSearchPreset = async (req, res) => {
   try {
     const { name, filters } = req.body;
 
-    if (
+    if ( typeof name !== "string" ||
       !name?.trim() ||
       !filters ||
       typeof filters !== "object" ||
