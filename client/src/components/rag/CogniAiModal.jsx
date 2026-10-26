@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import KNowledgeExplorer from "./KnowledgeExplorer"
+import KnowledgeExplorer from "./KnowledgeExplorer"
 import axios from "axios";
 import {
   X,
@@ -512,35 +512,11 @@ export const CogniAiModal = ({
               </div>
 
               {/* Uploaded Documents List */}
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200 px-1">
-                  <span>Uploaded Documents ({sources.length})</span>
-                  <span className="text-[11px] font-normal text-slate-400">
-                    {readySourcesCount} active for retrieval
-                  </span>
-                </div>
-
-                {loadingSources ? (
-                  <div className="p-6 text-center text-xs text-slate-400 animate-pulse">
-                    Loading knowledge sources...
-                  </div>
-                ) : sources.length === 0 ? (
-                  <div className="p-6 rounded-2xl bg-[var(--card)] border border-slate-200/80 dark:border-slate-800 text-center text-xs text-slate-400">
-                    No documents uploaded yet. Add a PDF above to enable grounded AI answers and quizzes.
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    {sources.map((s) => (
-                      <SourceItem
-                        key={s._id}
-                        source={s}
-                        onToggle={toggleSource}
-                        onDelete={deleteSource}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+              <KnowledgeExplorer 
+               roomId={roomId}
+               onToggle={toggleSource}
+               onDelete={deleteSource}
+               />
             </div>
           )}
 

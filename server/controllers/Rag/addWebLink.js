@@ -6,6 +6,10 @@ const addWebLink = async (req, res) => {
   try {
     const { roomId, url, title, description = "" } = req.body;
 
+    if(typeof url !== "string" || (title != undefined && typeof title !== "string")|| typeof description !== "string"){
+      return res.status(400).json({message: "invalid link details"});
+    }
+
     if (!mongoose.isValidObjectId(roomId)) {
       return res.status(400).json({ message: "Invalid room ID" });
     }
