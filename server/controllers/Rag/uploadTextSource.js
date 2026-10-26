@@ -39,6 +39,7 @@ export const uploadTextSource = async (req, res) => {
       room: roomId,
       type: "text",
       title: sourceTitle,
+      desctiption: cleanText.slice(0,500),
       originalName: "Note.txt",
       mimeType: "text/plain",
       sizeBytes: buffer.length,

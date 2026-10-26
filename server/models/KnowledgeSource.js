@@ -14,13 +14,24 @@ const knowledgeSourceSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["pdf", "image", "text", "ai_answer"],
+      enum: ["pdf", "image", "text", "ai_answer","web_link"],
       required: true,
     },
     title: {
       type: String,
       required: true,
       trim: true,
+    },
+    discription:{
+      type:String,
+      trim:true,
+      default:"",
+      maxlength:2000,
+    },
+    sourceUrl:{
+      type:String,
+      trim:true,
+      default:null
     },
     originalName: {
       type: String,
@@ -75,6 +86,9 @@ const knowledgeSourceSchema = new mongoose.Schema(
 
 knowledgeSourceSchema.index({ room: 1, contentHash: 1 });
 knowledgeSourceSchema.index({ room: 1, createdAt: -1 });
+knowledgeSourceSchema.index({ title:"text", description:"text", originalName:"text", sourceUrl:"text", });
+knowledgeSourceSchema.index({ room: 1, type: 1, createdAt: -1, });
+knowledgeSourceSchema.index({ room: 1, createdAt: -1, status: 1, });
 
 const KnowledgeSource = mongoose.model("KnowledgeSource", knowledgeSourceSchema);
 export default KnowledgeSource;

@@ -12,6 +12,8 @@ import updateRagSettings from "../controllers/Rag/updateRagSettings.js";
 import answerGeneral from "../controllers/Rag/answerGeneral.js";
 import learnFromMessage from "../controllers/Rag/learnFromMessage.js";
 import generateQuizController from "../controllers/Rag/generateQuiz.js";
+import { searchKnowledge, saveSearchPreset, getSearchPresets, deleteSearchPreset, } from "../controllers/Rag/searchKnowledge.js";
+import addWebLink from "../controllers/Rag/addWebLink.js"
 
 const router = express.Router();
 
@@ -39,6 +41,13 @@ const upload = multer({
 });
 
 router.use(authMiddleware);
+
+//Knowledge Explorer
+router.get("/knowledge/search", searchKnowledge);
+router.get("/search-presets", getSearchPresets);
+router.post("/search-presets", saveSearchPreset);
+router.delete("/search-presets/:id", deleteSearchPreset);
+router.post("/sources/link", addWebLink);
 
 // Knowledge Source Management
 router.post("/sources", upload.single("file"), uploadSource);

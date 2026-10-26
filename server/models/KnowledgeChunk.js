@@ -53,5 +53,7 @@ const knowledgeChunkSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+knowledgeChunkSchema.index({ text: "text"})
+
 const KnowledgeChunk = mongoose.model("KnowledgeChunk", knowledgeChunkSchema);
 export default KnowledgeChunk;
