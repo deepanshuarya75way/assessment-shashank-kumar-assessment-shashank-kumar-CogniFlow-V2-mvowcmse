@@ -109,7 +109,6 @@ export const searchKnowledge = async (req, res) => {
       searchFilter._id = { $in: matchingIds };
     }
 
-    // Counts use the search and date filters, but not the selected type.
     const groupedCounts = await KnowledgeSource.aggregate([
       { $match: searchFilter },
       {

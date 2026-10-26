@@ -77,7 +77,6 @@ const KnowledgeExplorer = ({
     },
   };
 
-  // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(filters.q);
@@ -86,7 +85,6 @@ const KnowledgeExplorer = ({
     return () => clearTimeout(timer);
   }, [filters.q]);
 
-  // Keep filters in the browser URL
   useEffect(() => {
     const params = new URLSearchParams();
 
@@ -102,7 +100,6 @@ const KnowledgeExplorer = ({
     window.history.replaceState({}, "", newUrl);
   }, [filters]);
 
-  // Fetch search results
   const fetchKnowledge = async () => {
     try {
       setLoading(true);
@@ -137,6 +134,16 @@ const KnowledgeExplorer = ({
   };
 
   useEffect(() => {
+    if(!debouncedQuery.trim()){
+      setSources([]);
+      setCounts({});
+      setPagination({
+        page:1,
+        total:0,
+        totalPages:0,
+      });
+      return;
+    }
     fetchKnowledge();
   }, [
     debouncedQuery,
@@ -148,7 +155,6 @@ const KnowledgeExplorer = ({
     pagination.page,
   ]);
 
-  // Load saved presets
   const fetchPresets = async () => {
     try {
       const { data } = await axios.get(
@@ -322,7 +328,6 @@ const KnowledgeExplorer = ({
   return (
     <div className="flex flex-col gap-4">
 
-      {/* Search */}
       <div className="relative">
         <Search
           size={16}
@@ -337,7 +342,6 @@ const KnowledgeExplorer = ({
         />
       </div>
 
-      {/* Material filters */}
       <div className="flex gap-2 flex-wrap">
         {TYPES.map((item) => (
           <button
@@ -357,8 +361,6 @@ const KnowledgeExplorer = ({
           </button>
         ))}
       </div>
-
-      {/* Advanced filters */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
         <select
           value={filters.roomId}
@@ -397,7 +399,6 @@ const KnowledgeExplorer = ({
         </select>
       </div>
 
-      {/* Presets */}
       <div className="flex flex-wrap gap-2">
         <select
           value={selectedPreset}
@@ -439,7 +440,6 @@ const KnowledgeExplorer = ({
         </button>
       </div>
 
-      {/* Add research link */}
       {roomId && (
         <form
           onSubmit={addResearchLink}
@@ -482,11 +482,9 @@ const KnowledgeExplorer = ({
           </button>
         </form>
       )}
-
-      {/* Results */}
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold text-[var(--text)]">
-          Search results ({pagination.total || 0})
+          {debouncedQuery.trim() ? `Search results ({pagination.total || 0})` : "Enter a search term to find knowledge"}
         </p>
 
         <button
@@ -520,7 +518,6 @@ const KnowledgeExplorer = ({
         </div>
       )}
 
-      {/* Pagination */}
       <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-700">
         <span className="text-xs text-slate-400">
           Page {pagination.page || 1} of {pagination.totalPages || 1}
